@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sqx.modules.coupon.dao.CouponUserDao">
+
+    <select id="selectCouponList" resultType="com.sqx.modules.coupon.entity.CouponUser">
+        select * from coupon_user where user_id = #{userId} and status = 0
+        <if test="format!=null and format!=''">
+            and date_format(expiration_time,'%Y-%m-%d') &gt; date_format(#{format},'%Y-%m-%d')
+        </if>
+        <if test="minMoney!=null and minMoney!=''">
+            and min_money &lt;= #{minMoney}
+        </if>
+        order by expiration_time asc
+    </select>
+
+    <select id="CouponList" resultType="com.sqx.modules.coupon.entity.CouponUser">
+        select * from coupon_user where user_id = #{userId}
+        <if test="status!=null">
+            and status = #{status}
+        </if>
+        order by create_time desc
+    </select>
+
+    <update id="updateExpiration">
+        update coupon_user set status = 2 where status=0 and date_format(expiration_time,'%Y-%m-%d') &lt; date_format(#{date},'%Y-%m-%d')
+    </update>
+
+    <select id="selectCouponByUserId" resultType="com.sqx.modules.coupon.entity.CouponUser">
+        select tcu.*, tu.user_name as nickName, tu.avatar as avatar, tu.phone as phone
+        from coupon_user tcu
+        left join tb_user tu on tcu.user_id = tu.user_id
+        where 1 = 1
+        <if test="userId!=null">
+            and tcu.user_id = #{userId}
+        </if>
+        <if test="status!=null">
+            and tcu.status = #{status}
+        </if>
+        <if test="phone!=null and phone!=''">
+            and tu.phone = #{phone}
+        </if>
+        <if test="couponName!=null and couponName!=''">
+            and tcu.coupon_name = #{couponName}
+        </if>
+        order by tcu.create_time desc
+    </select>
+
+    <select id="selectCountCoupon" resultType="int">
+        select count(*) from coupon_user where user_id = #{userId} and status = 0
+    </select>
+
+    <insert id="giveCoupon">
+        insert into coupon_user (user_id, coupon_name, coupon_picture, create_time, expiration_time, min_money, money, status, end_time) values
+        <foreach collection="userIdList" item="item" separator=",">
+            (#{item}, #{couponName}, #{couponPicture}, #{createTime}, #{expirationTime}, #{minMoney}, #{money}, #{status}, #{endTime})
+        </foreach>
+    </insert>
+
+</mapper>

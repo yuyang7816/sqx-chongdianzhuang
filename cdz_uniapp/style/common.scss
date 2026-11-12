@@ -1,0 +1,268 @@
+// @import './mixin.scss';
+$default-back: #1a1a1a;
+$theme-color: #FFE60F;
+$price-color: #FF1B1B;
+
+
+// .filter {
+// 	filter: brightness(0) invert(1);
+// }
+
+.card_back {
+	background: #2C2C2C !important;
+	border: 2px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.flex {
+	display: flex;
+}
+
+.flex-c {
+	display: flex;
+	flex-direction: column;
+}
+
+.jc {
+	justify-content: center;
+}
+
+.sb {
+	justify-content: space-between;
+}
+
+.se {
+	justify-content: space-evenly;
+}
+
+.sa {
+	justify-content: space-around;
+}
+
+.jce {
+	justify-content: flex-end;
+}
+
+.alic {
+	align-items: center;
+}
+
+.alie {
+	align-items: flex-end;
+}
+
+.alib {
+	align-items: baseline;
+}
+
+.alis {
+	align-items: flex-start;
+}
+
+.f {
+	color: #fff;
+}
+
+.bf {
+	background: #fff;
+}
+
+.ft {
+	color: $theme-color;
+}
+
+.bt {
+	background: $theme-color;
+}
+
+/*
+ * 字体类
+ * start
+*/
+.f24{
+	font-size: 24rpx;
+}
+.f28{
+	font-size: 28rpx;
+}
+.f32{
+	font-size: 32rpx;
+}
+.f36{
+	font-size: 36rpx;
+}
+.f40{
+	font-size: 40rpx;
+}
+.f48{
+	font-size: 48rpx;
+}
+.f64{
+	font-size: 64rpx;
+}
+
+
+
+//字体颜色
+.cfff{
+	color: #ffffff;
+}
+.c999{
+	color: #999999;
+}
+.c666{
+	color: #666666;
+}
+
+
+//边距
+.mb16{
+	margin-bottom: 16rpx;
+}
+.mb12{
+	margin-bottom: 12rpx;
+}
+.mt48{
+	margin-top:48rpx;
+}
+.mb32{
+	margin-bottom: 32rpx;
+}
+.mb30{
+	margin-bottom: 30rpx;
+}
+.pt52{
+	padding-top: 52rpx;
+}
+.pl32{
+	padding-left: 32rpx;
+}
+.ml24{
+	margin-left: 24rpx;
+}
+.p32{
+	padding: 32rpx;
+}
+.pt36{
+	padding-top: 36rpx;
+}
+.pb24{
+	padding-bottom: 24rpx;
+}
+.pl40{
+	padding-left: 40rpx;
+}
+.pr34{
+	padding-right: 40rpx;
+}
+.mr40{
+	margin-right: 40rpx;
+}
+
+/*
+ * 边距
+*/
+// @for $i from 1 through 100 {
+// 	.p#{$i} {
+// 		padding: #{$i}rpx;
+// 	}
+
+// 	.pt#{$i} {
+// 		padding-top: #{$i}rpx;
+// 	}
+
+// 	.pr#{$i} {
+// 		padding-right: #{$i}rpx;
+// 	}
+
+// 	.pb#{$i} {
+// 		padding-bottom: #{$i}rpx;
+// 	}
+
+// 	.pl#{$i} {
+// 		padding-left: #{$i}rpx;
+// 	}
+
+// 	.mt#{$i} {
+// 		margin-top: #{$i}rpx;
+// 	}
+
+// 	.mr#{$i} {
+// 		margin-right: #{$i}rpx;
+// 	}
+
+// 	.mb#{$i} {
+// 		margin-bottom: #{$i}rpx;
+// 	}
+
+// 	.ml#{$i} {
+// 		margin-left: #{$i}rpx;
+// 	}
+// }
+// @for $i from 1 through 70 {
+
+// 	// @if $i%2 ==0 {
+// 	.f#{$i} {
+// 		font-size: #{$i}rpx;
+// 	}
+
+// 	// }
+// }
+
+// $colors: #111, #222, #333, #444, #555, #666, #777, #888, #999, #000, #aaa, #bbb, #ccc, #ddd, #eee, #fff;
+// $sort: a, b, c, d, e, f;
+
+// @for $i from 1 through 16 {
+// 	@if $i ==10 {
+// 		.c000 {
+// 			color: nth($colors, $i)
+// 		}
+// 	}
+
+// 	@else if $i>10 {
+// 		.c#{nth($sort,$i - 10)}#{nth($sort,$i - 10)}#{nth($sort,$i - 10)} {
+// 			color: nth($colors, $i)
+// 		}
+// 	}
+
+// 	@else {
+// 		.c#{$i}#{$i}#{$i} {
+// 			color: nth($colors, $i);
+// 		}
+// 	}
+// }
+
+.bold {
+	font-weight: bold;
+}
+
+.nowrap {
+	white-space: nowrap;
+}
+
+/*
+ * 字体类end
+*/
+
+
+
+.ellipsis {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.price_num {
+	font-size: 24rpx;
+	font-weight: 800;
+	color: #FF1B1B;
+
+	.sub_num {
+		font-size: 28rpx;
+	}
+}
+
+.active {
+	&:active {
+		filter: brightness(0.8);
+	}
+}

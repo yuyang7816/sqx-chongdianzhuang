@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sqx.modules.coupon.respository.CouponActivityDao">
+
+
+    <select id="selectCouponActivity" resultType="com.sqx.modules.coupon.entity.CouponActivity">
+        select * from coupon_activity c
+        where is_ok is null
+          and date_format(now(),'%Y-%m-%d %H:%i:%s')>=date_format(activity_time,'%Y-%m-%d %H:%i:%s')
+          and date_format(now(),'%Y-%m-%d %H:%i:%s')&lt;=date_format(end_activity_time,'%Y-%m-%d %H:%i:%s')
+    </select>
+
+</mapper>

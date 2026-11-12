@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sqx.modules.coupon.dao.CouponIssueDao">
+
+    <select id="selectCouponIssueListByUserId" resultType="com.sqx.modules.coupon.entity.CouponIssue">
+        select * from coupon_issue c
+        where status=1
+        and ((coupon_issue_id not in (select coupon_issue_id from coupon_user where user_id=#{userId}  and coupon_issue_id is not null ) and is_limit=1 ) or is_limit=2 )
+        and classify=#{classify}
+    </select>
+
+
+
+</mapper>

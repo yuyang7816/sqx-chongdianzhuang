@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sqx.modules.tearoom.dao.GoodsDao">
+
+    <select id="selectGoodsPage" resultType="com.sqx.modules.tearoom.entity.Goods">
+        select g.*,(select count(*) from room r where r.goods_id=g.goods_id) as counts
+               <if test="admin!=null">
+                   ,(select sum(pay_money) from orders o where o.goods_id=g.goods_id and o.status in (2,3,4,6)) as sumMoney
+               </if>
+
+        from goods g
+        where 1=1
+        <if test="tearoomId!=null">
+            and g.tearoom_id like concat('%',#{tearoomId},'%')
+        </if>
+        <if test="goodsCategory!=null">
+            and g.goods_category = #{goodsCategory}
+        </if>
+        <if test="status!=null and status!=0">
+            and g.status = #{status}
+        </if>
+        <if test="goodsName!=null and goodsName!=''">
+            and g.goods_name like concat('%',#{goodsName},'%')
+        </if>
+        order by g.sort
+    </select>
+
+
+    <select id="selectGoodsList" resultType="com.sqx.modules.tearoom.entity.Goods">
+        select g.*,(select count(*) from room r where r.goods_id=g.goods_id) as counts
+        from goods g
+        where 1=1
+        <if test="tearoomId!=null">
+            and g.tearoom_id like concat('%',#{tearoomId},'%')
+        </if>
+        <if test="goodsCategory!=null">
+            and g.goods_category = #{goodsCategory}
+        </if>
+        <if test="status!=null and status!=0">
+            and g.status = #{status}
+        </if>
+        <if test="goodsName!=null and goodsName!=''">
+            and g.goods_name like concat('%',#{goodsName},'%')
+        </if>
+        order by g.sort
+    </select>
+
+</mapper>

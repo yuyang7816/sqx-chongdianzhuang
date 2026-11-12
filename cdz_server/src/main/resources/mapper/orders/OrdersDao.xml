@@ -1,0 +1,1146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sqx.modules.orders.dao.OrdersDao">
+
+    <select id="selectOrdersPage" resultType="com.sqx.modules.orders.entity.Orders">
+        select o.*,t.tearoom_name as tearoomName,t.tearoom_title_image as tearoomTitleImage,
+               u1.user_name as zhiUserName,u2.user_name as feiUserName,u.user_name as payUserName,
+               u.avatar as payAvatar,u.phone as payPhone,g.icon_img as iconImg,
+               openUser.user_name as openUserName,closeUser.user_name as closeUserName
+               from orders o
+        left join tearoom t on t.tearoom_id=o.tearoom_id
+        left join goods g on g.goods_id=o.goods_id
+        left join tb_user u on u.user_id=o.user_id
+        left join tb_user u1 on u1.user_id=o.zhi_user_id
+        left join tb_user u2 on u2.user_id=o.fei_user_id
+        left join tb_user openUser on openUser.user_id=o.open_user_id
+        left join tb_user closeUser on closeUser.user_id=o.close_user_id
+        where 1=1
+        <if test="ordersType!=null">
+            and o.orders_type = #{ordersType}
+        </if>
+        <if test="openUserId!=null">
+            and o.open_user_id = #{openUserId}
+        </if>
+        <if test="goodsCategory!=null and goodsCategory==5">
+            and o.goods_category in (1,2,3)
+        </if>
+        <if test="goodsCategory!=null and goodsCategory!=5">
+            and o.goods_category = #{goodsCategory}
+        </if>
+        <if test="isDelete!=null">
+            and o.is_delete is null
+        </if>
+        <if test="payWay!=null">
+            and o.pay_way=#{payWay}
+        </if>
+        <if test="money!=null and money==1">
+            and o.sum_money&lt;0
+        </if>
+        <if test="money!=null and money==0">
+            and o.sum_money>=0
+        </if>
+        <if test="userId!=null">
+            and o.user_id=#{userId}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and u.user_name like concat('%',#{userName},'%')
+        </if>
+        <if test="phone!=null and phone!=''">
+            and u.phone like concat('%',#{phone},'%')
+        </if>
+        <if test="ordersNo!=null and ordersNo!=''">
+            and o.orders_no like concat('%',#{ordersNo},'%')
+        </if>
+        <if test="goodsName!=null and goodsName!=''">
+            and o.goods_name like concat('%',#{goodsName},'%')
+        </if>
+        <if test="status!=null and status!=0 and status!=10 and status!=11">
+            and o.status=#{status}
+        </if>
+        <if test="status!=null and status==10">
+            and o.status in (2,3,4,6)
+        </if>
+        <if test="status!=null and status==11">
+            and o.status in (4,6) and o.shop_money>0
+        </if>
+        <if test="tearoomId!=null">
+            and o.tearoom_id=#{tearoomId}
+        </if>
+        <if test="isShop!=null and isShop==1">
+            and o.is_shop=#{isShop}
+        </if>
+        <if test="isShop!=null and isShop==2">
+            and o.is_shop is null
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and date_format(o.create_time,'%Y-%m-%d')>=date_format(#{startTime},'%Y-%m-%d')
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and date_format(o.create_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+        <if test="dateTime!=null and dateTime!=''">
+            and o.create_time like concat('%',#{dateTime},'%')
+        </if>
+        <if test="cameraId!=null">
+            and o.goods_id in (select goods_id from goods where camera_id=#{cameraId})
+        </if>
+        <if test="tearoomName!=null and tearoomName!=''">
+            and t.tearoom_name like concat('%',#{tearoomName},'%')
+        </if>
+        <if test="platformType!=null">
+            and o.platform_type = #{platformType}
+        </if>
+        order by o.create_time desc
+    </select>
+
+    <select id="selectOrdersList" resultType="com.sqx.modules.orders.entity.Orders">
+        select o.*,t.tearoom_name as tearoomName,u1.user_name as zhiUserName,u2.user_name as feiUserName,u.user_name as payUserName
+        from orders o
+        left join tearoom t on t.tearoom_id=o.tearoom_id
+        left join tb_user u on u.user_id=o.user_id
+        left join tb_user u1 on u1.user_id=o.zhi_user_id
+        left join tb_user u2 on u2.user_id=o.fei_user_id
+        where 1=1
+        <if test="ordersType!=null">
+            and o.orders_type = #{ordersType}
+        </if>
+        <if test="openUserId!=null">
+            and o.open_user_id = #{openUserId}
+        </if>
+        <if test="goodsCategory!=null and goodsCategory==5">
+            and o.goods_category in (1,2,3)
+        </if>
+        <if test="goodsCategory!=null and goodsCategory!=5">
+            and o.goods_category = #{goodsCategory}
+        </if>
+        <if test="isDelete!=null">
+            and o.is_delete is null
+        </if>
+        <if test="money!=null and money==1">
+            and o.sum_money&lt;0
+        </if>
+        <if test="money!=null and money==0">
+            and o.sum_money>=0
+        </if>
+        <if test="payWay!=null">
+            and o.pay_way=#{payWay}
+        </if>
+        <if test="userId!=null">
+            and o.user_id=#{userId}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and u.user_name like concat('%',#{userName},'%')
+        </if>
+        <if test="phone!=null and phone!=''">
+            and u.phone like concat('%',#{phone},'%')
+        </if>
+        <if test="ordersNo!=null and ordersNo!=''">
+            and o.orders_no like concat('%',#{ordersNo},'%')
+        </if>
+        <if test="goodsName!=null and goodsName!=''">
+            and o.goods_name like concat('%',#{goodsName},'%')
+        </if>
+        <if test="status!=null and status!=0">
+            and o.status=#{status}
+        </if>
+        <if test="tearoomId!=null">
+            and o.tearoom_id=#{tearoomId}
+        </if>
+        <if test="isShop!=null and isShop==1">
+            and o.is_shop=#{tearoomId}
+        </if>
+        <if test="isShop!=null and isShop==2">
+            and o.is_shop is null
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and date_format(o.start_time,'%Y-%m-%d')>=date_format(#{startTime},'%Y-%m-%d')
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and date_format(o.end_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+        <if test="dateTime!=null and dateTime!=''">
+            and o.create_time like concat('%',#{dateTime},'%')
+        </if>
+        <if test="tearoomName!=null and tearoomName!=''">
+            and t.tearoom_name like concat('%',#{tearoomName},'%')
+        </if>
+        <if test="platformType!=null">
+            and o.platform_type = #{platformType}
+        </if>
+        order by o.create_time desc
+    </select>
+
+    <update id="updateEndOrdersStatus">
+        update orders set open_door=2,status=6 where status=3 and date_format(end_time,'%Y-%m-%d %H:%i:%s')>=date_format(now(),'%Y-%m-%d %H:%i:%s')
+    </update>
+
+    <select id="selectEndOrdersStatusList" resultType="com.sqx.modules.orders.entity.Orders">
+        select * from orders where status=3 and date_format(end_time,'%Y-%m-%d %H:%i:%s')&lt;=date_format(now(),'%Y-%m-%d %H:%i:%s')
+    </select>
+
+    <update id="updateStartOrdersStatus">
+        update orders set status=3 where status=2 and date_format(start_time,'%Y-%m-%d %H:%i:%s')&lt;=date_format(now(),'%Y-%m-%d %H:%i:%s')
+    </update>
+
+    <select id="selectStartOrdersStatusList" resultType="com.sqx.modules.orders.entity.Orders">
+        select * from orders where status=2 and date_format(start_time,'%Y-%m-%d %H:%i:%s')&lt;=date_format(now(),'%Y-%m-%d %H:%i:%s')
+    </select>
+
+    <update id="updateOpenDoorOrders" >
+        update orders set open_door=1 where status in (2,3) and DATE_SUB(date_format( start_time,'%Y-%m-%d %H:%i:%s'), INTERVAL #{minute} MINUTE )&lt;=date_format(now(),'%Y-%m-%d %H:%i:%s')
+    </update>
+
+
+    <select id="selectOpenDoorOrdersList" resultType="com.sqx.modules.orders.entity.Orders" >
+        select * from  orders  where status in (2,3) and DATE_SUB(date_format( start_time,'%Y-%m-%d %H:%i:%s'), INTERVAL #{minute} MINUTE )&lt;=date_format(now(),'%Y-%m-%d %H:%i:%s')
+    </select>
+
+    <update id="updateCloseDoorOrders" >
+        update orders set open_door=2 where open_door=1 and status in (4,6) and  DATE_ADD( date_format(end_time,'%Y-%m-%d %H:%i:%s'), INTERVAL #{minute} MINUTE )&lt;=date_format(now(),'%Y-%m-%d %H:%i:%s')
+    </update>
+
+    <select id="selectCloseDoorOrdersList" resultType="com.sqx.modules.orders.entity.Orders">
+        select * from  orders  where open_door=1 and status in (4,6) and  DATE_ADD( date_format(end_time,'%Y-%m-%d %H:%i:%s'), INTERVAL #{minute} MINUTE )&lt;=date_format(now(),'%Y-%m-%d %H:%i:%s')
+    </select>
+
+    <select id="selectTeamUserList" resultType="Map">
+        select * from (
+        select u.user_id as userId,u.user_name as userName,u.avatar,u.create_time as createTime,
+        <if test="type==1">
+            (select ifnull(sum(o.zhi_money),0.00) from orders o where
+            o.user_id = u.user_id and o.status in (4,6) and zhi_user_id=#{userId} ) as money
+        </if>
+        <if test="type==2">
+            (select ifnull(sum(o.fei_money),0.00) from orders o where
+            o.user_id = u.user_id and o.status in (4,6) and fei_user_id=#{userId} ) as money
+        </if>
+        from tb_user u
+        where
+        <if test="type==1">
+            inviter_code=#{invitationCode}
+        </if>
+        <if test="type==2">
+            inviter_code in (select invitation_code from tb_user where inviter_code=#{invitationCode})
+        </if>
+        ) a order by money desc
+    </select>
+
+    <select id="selectOrdersMoneyCountByUserId" resultType="Double">
+        select
+        <if test="type==1">
+            ifnull(sum(zhi_money),0.00)
+        </if>
+        <if test="type==2">
+            ifnull(sum(fei_money),0.00)
+        </if>
+        from orders
+        where status in (4,6)
+        <if test="type==1">
+            and zhi_user_id=#{userId}
+        </if>
+        <if test="type==2">
+            and fei_user_id=#{userId}
+        </if>
+    </select>
+
+    <select id="selectUserCountByInvitationCode" resultType="Integer">
+        select count(*) from tb_user
+        where
+        <if test="type==1">
+            inviter_code=#{invitationCode}
+        </if>
+        <if test="type==2">
+            inviter_code in (select invitation_code from tb_user where inviter_code=#{invitationCode})
+        </if>
+    </select>
+
+    <select id="selectTearoomOrdersCount" resultType="Map">
+        select * from ( select sum(o.pay_money) as sumMoney,i.tearoom_name as tearoomName,i.tearoom_cover_image as tearoomCoverImage,
+        i.tearoom_province as tearoomProvince,i.tearoom_city as tearoomCity,i.tearoom_district as tearoomDistrict,
+        i.tearoom_address as tearoomAddress,i.score,i.tearoom_id as tearoomId
+        from orders o
+        left join tearoom i on o.tearoom_id=i.tearoom_id
+        where o.status in (2,3,4,6) and i.tearoom_id is not null
+        <if test="flag!=null and flag==1">
+            and date_format(o.create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(o.create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(o.create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        group by i.tearoom_id
+        order by sumMoney desc ) a where sumMoney is not null and tearoomId is not null
+    </select>
+
+    <select id="selectOrdersMoneyByTearoom" resultType="Double">
+        select sum(o.pay_money)
+        from orders o
+        where o.status in (2,3,4,6) and o.tearoom_id=#{tearoomId} and o.is_shop is null
+        <if test="payWay!=null">
+            and pay_way=#{payWay}
+        </if>
+        <if test="flag!=null and flag==1">
+            and date_format(o.create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(o.create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(o.create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+    </select>
+
+    <select id="selectOrdersCountByTearoom" resultType="Integer">
+        select count(*)
+        from orders o
+        where o.status in (2,3,4,6) and o.tearoom_id=#{tearoomId} and o.is_shop is null
+        <if test="payWay!=null">
+            and pay_way=#{payWay}
+        </if>
+        <if test="flag!=null and flag==1">
+            and date_format(o.create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(o.create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(o.create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+    </select>
+
+    <select id="selectOrdersMoneyByGoods" resultType="Double">
+        select sum(o.pay_money)
+        from orders o
+        where o.status in (2,3,4,6)
+        <if test="tearoomId!=null">
+            and o.tearoom_id=#{tearoomId}
+        </if>
+        <if test="goodsId!=null">
+            and o.goods_id=#{goodsId}
+        </if>
+        <if test="payWay!=null">
+            and o.pay_way=#{payWay}
+        </if>
+        <if test="flag!=null and flag==1">
+            and date_format(o.create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(o.create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(o.create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        <if test="flag!=null and flag==4">
+            and date_format(o.create_time,'%Y-%m-%d')>=date_format(#{time},'%Y-%m-%d')
+            and date_format(o.create_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+    </select>
+
+    <select id="selectOrdersCountByGoods" resultType="Integer">
+        select count(*)
+        from orders o
+        where o.status in (2,3,4,6)
+        <if test="tearoomId!=null">
+            and o.tearoom_id=#{tearoomId}
+        </if>
+        <if test="goodsId!=null">
+            and o.goods_id=#{goodsId}
+        </if>
+        <if test="payWay!=null">
+            and pay_way=#{payWay}
+        </if>
+        <if test="flag!=null and flag==1">
+            and date_format(o.create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(o.create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(o.create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        <if test="flag!=null and flag==4">
+            and date_format(o.create_time,'%Y-%m-%d')>=date_format(#{time},'%Y-%m-%d')
+            and date_format(o.create_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+    </select>
+
+    <select id="selectOrdersMoneyByTearoomId" resultType="Double">
+        select
+        <if test="isShop!=null and isShop==1">
+            sum(ifnull(o.shop_money,0.00))
+        </if>
+        <if test="isShop!=null and isShop==2">
+            sum(ifnull(o.pay_money,0.00))
+        </if>
+        <if test="isShop==null">
+            sum(ifnull(o.pay_money,0.00))
+        </if>
+        from orders o
+        where o.status in (2,3,4,6) and o.tearoom_id=#{tearoomId}
+        <if test="isShop!=null and isShop==1">
+            and o.is_shop is null
+        </if>
+        <if test="isShop!=null and isShop==2">
+            and o.is_shop=1
+        </if>
+        <if test="payWay!=null">
+            and pay_way=#{payWay}
+        </if>
+        <if test="flag!=null and flag==1">
+            and date_format(o.create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(o.create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(o.create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        <if test="flag!=null and flag==4">
+            and date_format(o.create_time,'%Y-%m-%d')>=date_format(#{time},'%Y-%m-%d')
+            and date_format(o.create_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+    </select>
+
+    <select id="selectCloseOrdersList" resultType="com.sqx.modules.orders.entity.Orders">
+        select * from orders where status=1
+        and date_format(DATE_ADD(create_time, INTERVAL #{time} MINUTE ),'%Y-%m-%d %H:%i:%s')&lt;=date_format(now(),'%Y-%m-%d %H:%i:%s')
+    </select>
+
+    <select id="selectOverTimeOrdersList" resultType="com.sqx.modules.orders.entity.Orders">
+        select * from orders where status=2 and orders_type=3
+        and date_format(DATE_ADD(pay_time, INTERVAL #{time} MINUTE ),'%Y-%m-%d %H:%i:%s')&lt;=date_format(now(),'%Y-%m-%d %H:%i:%s')
+    </select>
+
+
+    <select id="selectOrdersSumShopMoneyByTearoomId" resultType="Double">
+        select
+        <if test="isShop!=null and isShop==1">
+            sum(ifnull(o.shop_money,0.00))
+        </if>
+        <if test="isShop!=null and isShop==2">
+            sum(ifnull(o.pay_money,0.00))
+        </if>
+        <if test="isShop==null">
+            sum(ifnull(o.pay_money,0.00))
+        </if>
+        from orders o
+        where o.status in (4,6) and o.tearoom_id=#{tearoomId}
+        <if test="isShop!=null and isShop==1">
+            and o.is_shop is null
+        </if>
+        <if test="isShop!=null and isShop==2">
+            and o.is_shop=1
+        </if>
+        <if test="payWay!=null">
+            and pay_way=#{payWay}
+        </if>
+        <if test="flag!=null and flag==1">
+            and date_format(o.create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(o.create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(o.create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        <if test="flag!=null and flag==4">
+            and date_format(o.create_time,'%Y-%m-%d')>=date_format(#{time},'%Y-%m-%d')
+            and date_format(o.create_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+    </select>
+
+    <select id="selectOrdersSumPayMoneyByTearoomId" resultType="Double">
+        select
+            sum(ifnull(o.pay_money,0.00))
+        from orders o
+        where o.status in (2,3) and o.tearoom_id=#{tearoomId}
+        <if test="isShop!=null and isShop==1">
+            and o.is_shop is null
+        </if>
+        <if test="isShop!=null and isShop==2">
+            and o.is_shop=1
+        </if>
+        <if test="payWay!=null">
+            and pay_way=#{payWay}
+        </if>
+        <if test="flag!=null and flag==1">
+            and date_format(o.create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(o.create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(o.create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        <if test="flag!=null and flag==4">
+            and date_format(o.create_time,'%Y-%m-%d')>=date_format(#{time},'%Y-%m-%d')
+            and date_format(o.create_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+    </select>
+
+    <select id="selectOrdersShopCountByTearoomId" resultType="Integer">
+        select count(*)
+        from orders o
+        where o.status=4 and o.tearoom_id=#{tearoomId}
+        <if test="payWay!=null">
+            and pay_way=#{payWay}
+        </if>
+        <if test="flag!=null and flag==1">
+            and date_format(o.create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(o.create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(o.create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        <if test="flag!=null and flag==4">
+            and date_format(o.create_time,'%Y-%m-%d')>=date_format(#{time},'%Y-%m-%d')
+            and date_format(o.create_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+    </select>
+
+    <select id="selectUserByOrdersMoneyList" resultType="Map">
+        select u.user_name as userName,u.user_id as userId,u.avatar,ifnull(sum(o.shop_money),0.00) as money,
+               (select money from user_money um where um.user_id=o.user_id) as userMoney,u.phone
+        from orders o
+        left join tb_user u on u.user_id=o.user_id
+        where o.status=4 and o.tearoom_id=#{tearoomId} and u.user_id is not null
+        group by o.user_id
+        order by money desc
+    </select>
+
+    <select id="selectTearoomPayMoneyCountByTime" resultType="Double">
+        select sum(pay_money) from orders where status in (2,3,4,6)
+        <if test="flag!=null and flag==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        <if test="classify==1">
+            and goods_category in (1,2,3)
+        </if>
+        <if test="classify==2">
+            and goods_category in (4)
+        </if>
+    </select>
+
+    <select id="selectTearoomShopMoneyCountByTime" resultType="Double">
+        select sum(shop_money) from orders where status in (2,3,4,6)
+        <if test="flag!=null and flag==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        <if test="classify==1">
+            and goods_category in (1,2,3)
+        </if>
+        <if test="classify==2">
+            and goods_category in (4)
+        </if>
+    </select>
+
+    <select id="selectTearoomCashPledgeCountByTime" resultType="Double">
+        select sum(cash_pledge) from orders where status in (2,3,4,6)
+        <if test="flag!=null and flag==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        <if test="classify==1">
+            and goods_category in (1,2,3)
+        </if>
+        <if test="classify==2">
+            and goods_category in (4)
+        </if>
+    </select>
+
+    <select id="selectTearoomSumMoneyCountByTime" resultType="Double">
+        select sum(sum_money) from orders where status=3 and sum_money&lt;0
+        <if test="flag!=null and flag==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        <if test="classify==1">
+            and goods_category in (1,2,3)
+        </if>
+        <if test="classify==2">
+            and goods_category in (4)
+        </if>
+    </select>
+
+    <select id="selectUserByOrdersHourList" resultType="Map">
+        SELECT
+        user_id as userId,
+        user_name as userName,
+        avatar,
+        sex,
+        (select um.money from user_money um where um.user_id=subquery.user_id) as userMoney,
+        ifnull(MAX( order_duration ),0) AS duration,
+        ordersCount,
+        vipIcon
+        FROM
+        ( -- 子查询用于计算每个人的订单时长
+        SELECT u.user_id,u.user_name,u.avatar,u.sex,count(*) as ordersCount,v.vip_icon as vipIcon,
+               sum(TIMESTAMPDIFF( second, STR_TO_DATE( o.pay_time, '%Y-%m-%d %H:%i:%s' ), STR_TO_DATE( o.end_time, '%Y-%m-%d %H:%i:%s' ))) AS order_duration
+        FROM orders o
+        LEFT JOIN tb_user u ON u.user_id=o.user_id
+        left join vip v on v.vip_index=u.vip_index
+        where o.status in (4,6) and u.user_id is not null
+        <if test="type==1">
+            and date_format(o.pay_time,'%Y-%m')=date_format(now(),'%Y-%m')
+        </if>
+        <if test="type==2">
+            -- 将 startTime 从 varchar 转换为日期类型，并筛选出上个月的记录
+            and STR_TO_DATE(o.pay_time, '%Y-%m-%d %H:%i:%s') BETWEEN
+            -- 获取上个月的第一天
+            DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), '%Y-%m-01')
+            AND
+            -- 获取上个月的最后一天
+            LAST_DAY(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+        </if>
+        <if test="type==3">
+            -- 将 starTime 从 varchar 转换为日期时间类型，并筛选本周的记录
+            and STR_TO_DATE(o.pay_time, '%Y-%m-%d %H:%i:%s') BETWEEN
+            -- 获取本周的第一天（周一）
+            DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+            AND
+            -- 获取本周的最后一天（周日）
+            DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY)
+        </if>
+        <if test="type==4">
+            -- 将 starTime 从 varchar 转换为日期时间类型，并筛选上周的记录
+            and STR_TO_DATE(o.pay_time, '%Y-%m-%d %H:%i:%s') BETWEEN
+            -- 获取上周的第一天（周一）
+            DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 1 WEEK)
+            AND
+            -- 获取上周的最后一天（周日）
+            DATE_SUB(DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY), INTERVAL 1 WEEK)
+        </if>
+        <if test="city!=null and city!=''">
+            and o.tearoom_id in (select tearoom_id from tearoom where tearoom_city like concat('%',#{city},'%'))
+        </if>
+        <if test="tearoomId!=null">
+            and o.tearoom_id = #{tearoomId}
+        </if>
+        <if test="tearoomName!=null and tearoomName!=''">
+            and o.tearoom_id in (select tearoom_id from tearoom where tearoom_name like concat('%',#{tearoomName},'%'))
+        </if>
+        <if test="userName!=null and userName!=''">
+            and u.user_name like concat('%',#{userName},'%')
+        </if>
+        <if test="phone!=null and phone!=''">
+            and u.phone like concat('%',#{phone},'%')
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and date_format(o.pay_time,'%Y-%m-%d')>=date_format(#{startTime},'%Y-%m-%d')
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and date_format(o.pay_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+        GROUP BY user_id
+        ) AS subquery
+        GROUP BY user_id
+        order by duration desc
+    </select>
+
+    <select id="selectUserByOrdersHourByUserId" resultType="Map">
+        SELECT
+        user_id as userId,
+        user_name as userName,
+        avatar,
+        sex,
+        (select um.money from user_money um where um.user_id=subquery.user_id) as userMoney,
+        ifnull(MAX( order_duration ),0) AS duration,
+        count(*) as ordersCount,
+        (select vip_icon from vip v where v.vip_index=vipIndex) as vipIcon
+        FROM
+        ( -- 子查询用于计算每个人的订单时长
+        SELECT u.user_id,u.user_name,u.avatar,u.sex,u.vip_index as vipIndex,
+               sum(TIMESTAMPDIFF( MINUTE, STR_TO_DATE( o.pay_time, '%Y-%m-%d %H:%i:%s' ), STR_TO_DATE( o.end_time, '%Y-%m-%d %H:%i:%s' ))) AS order_duration
+        FROM orders o
+        LEFT JOIN tb_user u ON u.user_id=o.user_id
+        where o.status in (4,6) and u.user_id=#{userId}
+        <if test="type==1">
+            and date_format(o.pay_time,'%Y-%m')=date_format(now(),'%Y-%m')
+        </if>
+        <if test="type==2">
+            -- 将 startTime 从 varchar 转换为日期类型，并筛选出上个月的记录
+            and STR_TO_DATE(o.pay_time, '%Y-%m-%d %H:%i:%s') BETWEEN
+            -- 获取上个月的第一天
+            DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), '%Y-%m-01')
+            AND
+            -- 获取上个月的最后一天
+            LAST_DAY(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+        </if>
+        <if test="type==3">
+            -- 将 starTime 从 varchar 转换为日期时间类型，并筛选本周的记录
+            and STR_TO_DATE(o.pay_time, '%Y-%m-%d %H:%i:%s') BETWEEN
+            -- 获取本周的第一天（周一）
+            DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+            AND
+            -- 获取本周的最后一天（周日）
+            DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY)
+        </if>
+        <if test="type==4">
+            -- 将 starTime 从 varchar 转换为日期时间类型，并筛选上周的记录
+            and STR_TO_DATE(o.pay_time, '%Y-%m-%d %H:%i:%s') BETWEEN
+            -- 获取上周的第一天（周一）
+            DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 1 WEEK)
+            AND
+            -- 获取上周的最后一天（周日）
+            DATE_SUB(DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY), INTERVAL 1 WEEK)
+        </if>
+        <if test="city!=null and city!=''">
+            and o.tearoom_id in (select tearoom_id from tearoom where tearoom_city like concat('%',#{city},'%'))
+        </if>
+        <if test="tearoomId!=null">
+            and o.tearoom_id = #{tearoomId}
+        </if>
+        ) AS subquery
+        GROUP BY user_id
+        order by duration desc
+    </select>
+
+    <select id="selectOrdersHourByTearoomId" resultType="Integer">
+        select sum(TIMESTAMPDIFF( SECOND, STR_TO_DATE(pay_time, '%Y-%m-%d %H:%i:%s' ), STR_TO_DATE(end_time, '%Y-%m-%d %H:%i:%s' ))) AS order_duration from orders
+        where tearoom_id=#{tearoomId} and status in (4,6)
+        <if test="type==1">
+            and date_format(pay_time,'%Y-%m-%d')=date_format(now(),'%Y-%m-%d')
+        </if>
+        <if test="type==2">
+            and date_format(pay_time,'%Y-%m')=date_format(now(),'%Y-%m')
+        </if>
+    </select>
+
+    <select id="selectOrdersGoodsHourByTearoomId" resultType="Integer">
+        select sum(TIMESTAMPDIFF( SECOND, STR_TO_DATE(pay_time, '%Y-%m-%d %H:%i:%s' ), STR_TO_DATE(end_time, '%Y-%m-%d %H:%i:%s' ))) AS order_duration from orders
+        where goods_id=#{goodsId} and status in (4,6)
+        <if test="isShop!=null and isShop==1">
+            and is_shop=#{isShop}
+        </if>
+        <if test="isShop!=null and isShop==2">
+            and is_shop is null
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and date_format(create_time,'%Y-%m-%d')>=date_format(#{startTime},'%Y-%m-%d')
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and date_format(create_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+    </select>
+
+    <select id="selectOrdersGoodsMoneyByTearoomId" resultType="Double">
+        select ifnull(sum(pay_money),0.00) from orders
+        where goods_id=#{goodsId} and status in (4,6)
+        <if test="isShop!=null and isShop==1">
+            and is_shop=#{isShop}
+        </if>
+        <if test="isShop!=null and isShop==2">
+            and is_shop is null
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and date_format(create_time,'%Y-%m-%d')>=date_format(#{startTime},'%Y-%m-%d')
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and date_format(create_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+    </select>
+
+    <select id="selectOrdersPayMoneyByTime" resultType="Double">
+        select ifnull(sum(pay_money),0.00) from orders
+        where status in (4,6)
+        <if test="type!=null and type==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="type!=null and type==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="type!=null and type==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+    </select>
+
+    <select id="selectOrdersShopMoneyByTime" resultType="Double">
+        select ifnull(sum(shop_money),0.00) from orders
+        where status in (4,6)
+        <if test="type!=null and type==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="type!=null and type==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="type!=null and type==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+    </select>
+
+    <select id="selectOrdersFenMoneyByTime" resultType="Double">
+        select ifnull(sum(zhi_money),0.00) from orders
+        where status in (4,6)
+        <if test="type!=null and type==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="type!=null and type==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="type!=null and type==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+    </select>
+
+    <select id="selectOrdersByVideoTime" resultType="com.sqx.modules.orders.entity.Orders">
+        select * from orders
+        where date_format(pay_time,'%Y-%m-%d %H:%i:%s')&lt;=#{videoTime} and orders_type=1
+        and (end_time is null or date_format(date_add(end_time,INTERVAL 30 minute),'%Y-%m-%d %H:%i:%s')>=#{videoTime})
+        and goods_id=#{goodsId} and tearoom_id=#{tearoomId}
+        order by end_time desc limit 1
+    </select>
+
+    <select id="selectOrdersUserMoneyList" resultType="Map">
+        select ifnull(sum(o.pay_money),0.00) as money,u.user_name as userName,u.user_id as userId,u.phone
+        from orders o
+        left join tb_user u on u.user_id=o.user_id
+        where o.status in (4,6)
+        <if test="userName!=null and userName!=''">
+            and u.user_name like concat('%',#{userName},'%')
+        </if>
+        <if test="phone!=null and phone!=''">
+            and u.phone like concat('%',#{phone},'%')
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and date_format(o.pay_time,'%Y-%m-%d')>=date_format(#{startTime},'%Y-%m-%d')
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and date_format(o.pay_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+        group by o.user_id
+        order by money desc
+    </select>
+
+    <select id="selectOrdersHourByUserId" resultType="Integer">
+        SELECT sum(TIMESTAMPDIFF( hour, STR_TO_DATE( o.pay_time, '%Y-%m-%d %H:%i:%s' ), STR_TO_DATE( o.end_time, '%Y-%m-%d %H:%i:%s' ))) AS order_duration
+        FROM orders o
+        where o.user_id=#{userId} and o.status in (4,6)
+    </select>
+
+    <select id="selectOrdersCountByNoIsShop" resultType="Integer">
+        select count(*) from orders where is_shop is null and status in (4,6)
+        <if test="type!=null and type==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="type!=null and type==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="type!=null and type==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+    </select>
+
+    <select id="selectOrdersMoneyCountByNoIsShop" resultType="Integer">
+        select count(*) from orders where is_shop is null and coupon_id is null and status in (4,6)
+        <if test="type!=null and type==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="type!=null and type==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="type!=null and type==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+    </select>
+
+    <select id="selectOrdersCouponCountByNoIsShop" resultType="Integer">
+        select count(*) from orders where is_shop is null and coupon_id is not null and status in (4,6)
+        <if test="type!=null and type==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="type!=null and type==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="type!=null and type==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+    </select>
+
+    <select id="selectShopOpenOrdersMoney" resultType="Double">
+        select IFNULL(SUM(IF(shop_pay_money IS NULL, pay_money, shop_pay_money)), 0.00)
+        from orders
+        where tearoom_id=#{tearoomId} and status in (4,6)
+        <if test="openUserId!=null">
+            and open_user_id=#{openUserId}
+        </if>
+        <if test="shopWay!=null">
+            and shop_way=#{shopWay}
+        </if>
+        <if test="type!=null and type==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="type!=null and type==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="type!=null and type==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+    </select>
+
+    <select id="selectShopOpenOrdersCount" resultType="Integer">
+        select count(*)
+        from orders
+        where tearoom_id=#{tearoomId} and status in (4,6)
+        <if test="openUserId!=null">
+            and open_user_id=#{openUserId}
+        </if>
+        <if test="shopWay!=null">
+            and shop_way=#{shopWay}
+        </if>
+        <if test="type!=null and type==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="type!=null and type==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="type!=null and type==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+    </select>
+
+    <select id="selectEmployeeUserList" resultType="Map">
+        select count(*) as counts,IFNULL(SUM(IF(shop_pay_money IS NULL, pay_money, shop_pay_money)), 0.00) as sumMoney,u.user_name as userName
+        from orders o
+        left join tb_user u on u.user_id=o.open_user_id
+        where o.open_user_id in (#{userIds}) and o.status in (3,4,6,7,8)
+        <if test="type!=null and type==1">
+            and date_format(o.create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="type!=null and type==2">
+            and date_format(o.create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="type!=null and type==3">
+            and date_format(o.create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        order by sumMoney desc
+    </select>
+
+    <select id="selectOrdersShopMoney" resultType="java.math.BigDecimal">
+        select IFNULL(SUM(IF(shop_pay_money IS NULL, pay_money, shop_pay_money)), 0.00) as sumMoney
+        from orders
+        where shop_way=#{shopWay} and status in (4,6,7,8) and tearoom_id=#{tearoomId}
+        and date_format(end_time,'%Y-%m-%d %H:%i:%S')>=date_format(#{startTime},'%Y-%m-%d %H:%i:%S')
+        and date_format(end_time,'%Y-%m-%d %H:%i:%S')&lt;=date_format(#{endTime},'%Y-%m-%d %H:%i:%S')
+    </select>
+
+    <select id="selectOrdersShopCount" resultType="Integer">
+        select count(*)
+        from orders
+        where shop_way=#{shopWay} and status in (4,6,7,8) and tearoom_id=#{tearoomId}
+          and date_format(end_time,'%Y-%m-%d %H:%i:%S')>=date_format(#{startTime},'%Y-%m-%d %H:%i:%S')
+          and date_format(end_time,'%Y-%m-%d %H:%i:%S')&lt;=date_format(#{endTime},'%Y-%m-%d %H:%i:%S')
+    </select>
+
+    <select id="selectOrdersSmqMoney" resultType="java.math.BigDecimal">
+        select IFNULL(SUM(IF(shop_pay_money IS NULL, pay_money, shop_pay_money)), 0.00) as sumMoney
+        from orders
+        where is_shop=1 and status in (3,4,6,7,8) and tearoom_id=#{tearoomId} and platform_type=#{platformType}
+          and date_format(pay_time,'%Y-%m-%d %H:%i:%S')>=date_format(#{startTime},'%Y-%m-%d %H:%i:%S')
+          and date_format(pay_time,'%Y-%m-%d %H:%i:%S')&lt;=date_format(#{endTime},'%Y-%m-%d %H:%i:%S')
+    </select>
+
+    <select id="selectOrdersSmqCount" resultType="Integer">
+        select count(*)
+        from orders
+        where is_shop=1 and status in (3,4,6,7,8) and tearoom_id=#{tearoomId} and platform_type=#{platformType}
+          and date_format(pay_time,'%Y-%m-%d %H:%i:%S')>=date_format(#{startTime},'%Y-%m-%d %H:%i:%S')
+          and date_format(pay_time,'%Y-%m-%d %H:%i:%S')&lt;=date_format(#{endTime},'%Y-%m-%d %H:%i:%S')
+    </select>
+
+    <select id="selectOrdersYhMoney" resultType="java.math.BigDecimal">
+        select IFNULL(SUM(IF(shop_pay_money IS NULL, pay_money, shop_pay_money)), 0.00) as sumMoney
+        from orders
+        where user_id is not null and is_shop is null and status in (3,4,6,7,8) and tearoom_id=#{tearoomId} and pay_way=#{payWay}
+        <if test="platformType!=null">
+          <if test="platformType!=4">
+              and platform_type=#{platformType}
+          </if>
+            <if test="platformType==4">
+                and platform_type is null and coupon_id is not null
+            </if>
+        </if>
+        <if test="platformType==null">
+            and platform_type is null
+        </if>
+        and date_format(pay_time,'%Y-%m-%d %H:%i:%S')>=date_format(#{startTime},'%Y-%m-%d %H:%i:%S')
+        and date_format(pay_time,'%Y-%m-%d %H:%i:%S')&lt;=date_format(#{endTime},'%Y-%m-%d %H:%i:%S')
+    </select>
+
+    <select id="selectOrdersYhCount" resultType="Integer">
+        select count(*)
+        from orders
+        where user_id is not null and is_shop is null and status in (3,4,6,7,8) and tearoom_id=#{tearoomId} and pay_way=#{payWay}
+        <if test="platformType!=null">
+            <if test="platformType!=4">
+                and platform_type=#{platformType}
+            </if>
+            <if test="platformType==4">
+                and platform_type is null and coupon_id is not null
+            </if>
+        </if>
+        <if test="platformType==null">
+            and platform_type is null
+        </if>
+        and date_format(pay_time,'%Y-%m-%d %H:%i:%S')>=date_format(#{startTime},'%Y-%m-%d %H:%i:%S')
+        and date_format(pay_time,'%Y-%m-%d %H:%i:%S')&lt;=date_format(#{endTime},'%Y-%m-%d %H:%i:%S')
+    </select>
+
+    <select id="selectOrdersSumMinuteByGoodsId" resultType="Double">
+        select ifnull(sum(TIMESTAMPDIFF(MINUTE, start_time, end_time)),0)
+        from orders o
+        where o.status in (4,6)
+        <if test="tearoomId!=null">
+            and o.tearoom_id=#{tearoomId}
+        </if>
+        <if test="goodsId!=null">
+            and o.goods_id=#{goodsId}
+        </if>
+        <if test="payWay!=null">
+            and pay_way=#{payWay}
+        </if>
+        <if test="flag!=null and flag==1">
+            and date_format(o.create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(o.create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(o.create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        <if test="flag!=null and flag==4">
+            and date_format(o.create_time,'%Y-%m-%d')>=date_format(#{time},'%Y-%m-%d')
+            and date_format(o.create_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+    </select>
+
+    <select id="selectOrdersSumMoneyByGoodsId" resultType="Double">
+        select ifnull(sum(pay_money),0)
+        from orders o
+        where o.status in (4,6)
+        <if test="tearoomId!=null">
+            and o.tearoom_id=#{tearoomId}
+        </if>
+        <if test="goodsId!=null">
+            and o.goods_id=#{goodsId}
+        </if>
+        <if test="payWay!=null">
+            and pay_way=#{payWay}
+        </if>
+        <if test="flag!=null and flag==1">
+            and date_format(o.create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(o.create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(o.create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+        <if test="flag!=null and flag==4">
+            and date_format(o.create_time,'%Y-%m-%d')>=date_format(#{time},'%Y-%m-%d')
+            and date_format(o.create_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+    </select>
+
+    <select id="selectOrdersMoneyByStartTimeAndEndTime" resultType="Double">
+        select ifnull(sum(pay_money),0) from orders
+        where tearoom_id=#{tearoomId} and status in (2,3,4,6)
+        <if test="flag!=null and flag==1">
+            and date_format(create_time,'%Y-%m-%d')>=date_format(#{startTime},'%Y-%m-%d')
+            and date_format(create_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{startTime},'%Y-%m-%d')
+            <if test="platformType!=null and platformType==4">
+                and pay_way=1
+            </if>
+            <if test="platformType!=null and platformType==5">
+                and pay_way=3 and coupon_id is null
+            </if>
+            <if test="platformType!=null and platformType==6">
+                and pay_way=3 and coupon_id is not null
+            </if>
+        </if>
+        <if test="flag!=null and flag==3">
+            <if test="platformType!=null and platformType==4">
+                and pay_way=1
+            </if>
+            <if test="platformType!=null and platformType==5">
+                and pay_way=3 and coupon_id is null
+            </if>
+            <if test="platformType!=null and platformType==6">
+                and pay_way=3 and coupon_id is not null
+            </if>
+        </if>
+
+    </select>
+
+    <select id="selectOrdersCountByStartTimeAndEndTime" resultType="Integer">
+        select count(*) from orders
+        where tearoom_id=#{tearoomId}
+        <if test="flag!=null and flag==1">
+            and status in (2,3,4,6)
+            and date_format(create_time,'%Y-%m-%d')>=date_format(#{startTime},'%Y-%m-%d')
+            and date_format(create_time,'%Y-%m-%d')&lt;=date_format(#{endTime},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and status in (2,3,4,6)
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{startTime},'%Y-%m-%d')
+            <if test="platformType!=null and platformType==4">
+                and pay_way=1
+            </if>
+            <if test="platformType!=null and platformType==5">
+                and pay_way=3 and coupon_id is null
+            </if>
+            <if test="platformType!=null and platformType==6">
+                and pay_way=3 and coupon_id is not null
+            </if>
+            <if test="platformType!=null and platformType!=4 and platformType!=5 and platformType!=6">
+                and platform_type=#{platformType}
+            </if>
+        </if>
+        <if test="flag!=null and flag==3">
+            <if test="platformType!=null and platformType==4">
+                and pay_way=1
+            </if>
+            <if test="platformType!=null and platformType==5">
+                and pay_way=3 and coupon_id is null
+            </if>
+            <if test="platformType!=null and platformType==6">
+                and pay_way=3 and coupon_id is not null
+            </if>
+            <if test="platformType!=null and platformType!=4 and platformType!=5 and platformType!=6">
+                and platform_type=#{platformType}
+            </if>
+        </if>
+    </select>
+
+
+</mapper>

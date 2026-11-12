@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sqx.modules.tearoom.dao.TearoomDao">
+
+    <select id="selectTearoomPage" resultType="com.sqx.modules.tearoom.entity.Tearoom">
+        select * from (
+        SELECT
+        t.*,
+        (st_distance(point(t.tearoom_longitude, t.tearoom_latitude), point(#{longitude}, #{latitude})) * 111195) AS distance,
+        u.user_name AS userName,
+        u.phone,
+        IFNULL((
+        SELECT
+        CASE
+        WHEN (
+        SELECT IFNULL(uv.is_vip, 0)
+        FROM user_vip uv
+        WHERE uv.user_id = #{byUserId}
+        AND uv.is_vip = 1
+        AND NOW() BETWEEN uv.create_time AND uv.end_time
+        ) = 1 THEN gt.member_electricity_price
+        ELSE gt.electricity_price
+        END
+        FROM goods_time gt
+        WHERE gt.tearoom_id = t.tearoom_id
+        AND DATE_FORMAT(NOW(), '%H:%i:%s') BETWEEN gt.start_time AND gt.end_time
+        LIMIT 1
+        ), 0) AS price,
+        (SELECT COUNT(*) FROM goods g WHERE g.goods_category=1 AND g.tearoom_id=t.tearoom_id) AS kuaiCount,
+        (SELECT COUNT(*) FROM goods g WHERE g.goods_category=1 AND g.tearoom_id=t.tearoom_id AND g.goods_status=2) AS kuaiCount2,
+        (SELECT COUNT(*) FROM goods g WHERE g.goods_category=2 AND g.tearoom_id=t.tearoom_id) AS manCount,
+        (SELECT COUNT(*) FROM goods g WHERE g.goods_category=2 AND g.tearoom_id=t.tearoom_id AND g.goods_status=2) AS manCount2
+        FROM tearoom t
+        LEFT JOIN tb_user u ON u.user_id = t.user_id
+        WHERE 1=1
+        <if test="city!=null and city!=''">
+            and t.tearoom_city like concat('%',#{city},'%')
+        </if>
+        <if test="status!=null and status!=0">
+            and t.status = #{status}
+        </if>
+        <if test="tearoomName!=null and tearoomName!=''">
+            and t.tearoom_name like concat('%',#{tearoomName},'%')
+        </if>
+        <if test="userId!=null">
+            and t.user_id = #{userId}
+        </if>
+        <if test="tearoomType!=null">
+            and t.tearoom_type = #{tearoomType}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and u.user_name like concat('%',#{userName},'%')
+        </if>
+        <if test="tearoomPhone!=null and tearoomPhone!=''">
+            and t.tearoom_phone like concat('%',#{tearoomPhone},'%')
+        </if>
+        <if test="tearoomUserId!=null">
+            and (t.user_id = #{tearoomUserId} or
+            t.employee_user_ids like concat('%,',#{tearoomUserId},'') or
+            t.employee_user_ids like concat('',#{tearoomUserId},',%') or
+            t.employee_user_ids like concat('%,',#{tearoomUserId},',%') or
+            t.employee_user_ids = #{tearoomUserId}
+            )
+        </if>
+        <if test="shopType!=null">
+            and t.shop_type = #{shopType}
+        </if>
+        <if test="isVipPrivilege!=null">
+            and t.is_vip_privilege = #{isVipPrivilege}
+        </if>
+        ) a
+        <if test="sort==null">
+            order by distance asc,create_time desc
+        </if>
+        <if test="sort!=null and sort==1">
+            order by distance asc,create_time desc
+        </if>
+        <if test="sort!=null and sort==2">
+            where kuaiCount>0 order by distance asc
+        </if>
+        <if test="sort!=null and sort==3">
+            where manCount>0 order by distance asc
+        </if>
+        <if test="sort!=null and sort==4">
+            order by distance asc
+        </if>
+        <if test="sort!=null and sort==5">
+            order by price asc
+        </if>
+    </select>
+
+    <select id="selectTearoomList" resultType="com.sqx.modules.tearoom.entity.Tearoom">
+        select t.*,(st_distance(point(t.tearoom_longitude, t.tearoom_latitude), point(#{longitude}, #{latitude})) * 111195) as distance,
+        u.user_name as userName,u.phone
+        from tearoom t
+        left join tb_user u on u.user_id=t.user_id
+        where 1=1
+        <if test="city!=null and city!=''">
+            and t.tearoom_city like concat('%',#{city},'%')
+        </if>
+        <if test="status!=null and status!=0">
+            and t.status = #{status}
+        </if>
+        <if test="tearoomName!=null and tearoomName!=''">
+            and t.tearoom_name like concat('%',#{tearoomName},'%')
+        </if>
+        <if test="tearoomPhone!=null and tearoomPhone!=''">
+            and t.tearoom_phone like concat('%',#{tearoomPhone},'%')
+        </if>
+        <if test="userId!=null">
+            and t.user_id = #{userId}
+        </if>
+        <if test="tearoomType!=null">
+            and t.tearoom_type = #{tearoomType}
+        </if>
+        <if test="tearoomUserId!=null">
+            and (t.user_id = #{tearoomUserId} or
+            t.employee_user_ids like concat('%,',#{tearoomUserId},'') or
+            t.employee_user_ids like concat('',#{tearoomUserId},',%') or
+            t.employee_user_ids like concat('%,',#{tearoomUserId},',%') or
+            t.employee_user_ids = #{tearoomUserId}
+            )
+        </if>
+        <if test="shopType!=null">
+            and t.shop_type = #{shopType}
+        </if>
+        <if test="isVipPrivilege!=null">
+            and t.is_vip_privilege = #{isVipPrivilege}
+        </if>
+        order by
+        <if test="sort==null">
+            distance asc
+        </if>
+        <if test="sort!=null and sort==1">
+            t.create_time desc
+        </if>
+        <if test="sort!=null and sort==2">
+            t.sales asc
+        </if>
+        <if test="sort!=null and sort==3">
+            t.sales desc
+        </if>
+        <if test="sort!=null and sort==4">
+            distance asc
+        </if>
+        <if test="sort!=null and sort==5">
+            distance desc
+        </if>
+    </select>
+
+    <select id="selectTearoomById" resultType="com.sqx.modules.tearoom.entity.Tearoom">
+        select t.*,(st_distance(point(t.tearoom_longitude, t.tearoom_latitude), point(#{longitude}, #{latitude})) * 111195) as distance,
+        u.user_name as userName,u.phone,
+        (select count(*) from goods g where g.goods_category=1 and g.tearoom_id=t.tearoom_id) as kuaiCount,
+        (select count(*) from goods g where g.goods_category=1 and g.tearoom_id=t.tearoom_id and g.goods_status=2) as kuaiCount2,
+        (select count(*) from goods g where g.goods_category=2 and g.tearoom_id=t.tearoom_id) as manCount,
+        (select count(*) from goods g where g.goods_category=2 and g.tearoom_id=t.tearoom_id and g.goods_status=2) as manCount2
+        from tearoom t
+        left join tb_user u on u.user_id=t.user_id
+        where t.tearoom_id=#{tearoomId}
+    </select>
+
+    <select id="queryTearoomCount" resultType="int">
+        select count(*)from tearoom where 1=1
+        <if test="type==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{date},'%Y-%m-%d')
+        </if>
+        <if test="type==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{date},'%Y-%m')
+        </if>
+        <if test="type==3">
+            and date_format(create_time,'%Y')=date_format(#{date},'%Y')
+        </if>
+
+    </select>
+
+    <select id="selectTearoomByDistance" resultType="com.sqx.modules.tearoom.entity.Tearoom">
+        select *,(st_distance(point(tearoom_longitude, tearoom_latitude), point(#{longitude}, #{latitude})) * 111195) as distance
+        from tearoom
+        where status=1
+        order by distance asc
+        limit 1
+    </select>
+
+    <select id="selectTearoomByOrdersUserId" resultType="com.sqx.modules.tearoom.entity.Tearoom">
+        select t.*,(st_distance(point(t.tearoom_longitude, t.tearoom_latitude), point(#{longitude}, #{latitude})) * 111195) as distance,
+        u.user_name as userName,u.phone,
+        (select count(*) from goods g where g.goods_category=1 and g.tearoom_id=t.tearoom_id) as kuaiCount,
+        (select count(*) from goods g where g.goods_category=1 and g.tearoom_id=t.tearoom_id and g.goods_status=2) as kuaiCount2,
+        (select count(*) from goods g where g.goods_category=2 and g.tearoom_id=t.tearoom_id) as manCount,
+        (select count(*) from goods g where g.goods_category=2 and g.tearoom_id=t.tearoom_id and g.goods_status=2) as manCount2
+        from orders o
+        left join tearoom t on t.tearoom_id=o.tearoom_id
+        left join tb_user u on u.user_id=t.user_id
+        where t.tearoom_id is not null and o.user_id=#{userId} and t.status=1
+        <if test="tearoomType!=null">
+            and tearoom_type=#{tearoomType}
+        </if>
+        group by o.tearoom_id
+        order by o.create_time desc
+    </select>
+
+</mapper>
