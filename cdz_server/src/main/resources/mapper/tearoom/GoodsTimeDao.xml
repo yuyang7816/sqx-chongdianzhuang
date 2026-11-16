@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sqx.modules.tearoom.dao.GoodsTimeDao">
+
+    <!-- 根据时间和茶室ID查询价格规则（仅保留时间和茶室ID匹配） -->
+    <select id="selectGoodsTimeByTime" resultType="com.sqx.modules.tearoom.entity.GoodsTime">
+        select * from goods_time
+        where start_time &lt;= #{time}
+          and end_time >= #{time}
+          and tearoom_id = #{tearoomId}
+    </select>
+
+    <select id="selectGoodsTimeByRuleType" resultType="com.sqx.modules.tearoom.entity.GoodsTime">
+        SELECT hour_price, minute_price,member_hour_price,member_minute_price
+        FROM goods_time
+        WHERE tearoom_id = #{tearoomId}
+          AND #{time} >= start_time AND #{time} &lt;end_time
+            limit 1
+    </select>
+
+
+
+</mapper>

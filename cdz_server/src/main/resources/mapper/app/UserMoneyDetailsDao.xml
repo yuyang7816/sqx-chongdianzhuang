@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sqx.modules.app.dao.UserMoneyDetailsDao">
+
+    <select id="monthIncome" resultType="Double">
+        select sum(money)  from user_money_details where user_id=#{userId} and classify=4 and type=2 and state=2 and   date_format(create_time,'%Y-%m')=date_format(#{date},'%Y-%m')
+    </select>
+
+    <select id="selectMyProfit" resultType="Double">
+        select sum(money) from user_money_details where user_id=#{userId} and `type`=1 and (classify is null or classify!=3)
+    </select>
+
+    <select id="selectSumMoneyByClassifyAndUserId" resultType="Double">
+        select ifnull(sum(money),0) from user_money_details
+        where user_id=#{userId}
+        <if test="classify!=null">
+            and classify=#{classify}
+        </if>
+        <if test="classify==null">
+            and classify in (5,6)
+        </if>
+        <if test="time!=null">
+            <if test="flag==1">
+                and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+            </if>
+            <if test="flag==2">
+                and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+            </if>
+            <if test="flag==3">
+                and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+            </if>
+        </if>
+    </select>
+
+    <select id="selectConsortiaPersonMoney" resultType="com.sqx.modules.app.entity.UserEntity">
+        select * from (
+                          select u.*,
+                                 (select sum(money) from user_money_details where user_id=#{userId} and classify in (5,6) and by_user_id=u.user_id) as money
+                          from tb_user u
+                          where consortia_id=#{consortiaId}
+                      ) a
+        order by money desc
+    </select>
+
+    <select id="selectUserMoneyDetailsUserIdAndByUserId" resultType="com.sqx.modules.app.entity.UserMoneyDetails">
+        select * from user_money_details
+        where user_id=#{userId} and by_user_id=#{byUserId}
+          and classify=#{classify}
+        order by create_time desc
+    </select>
+
+    <select id="selectUserMoneyDetailsUserId" resultType="com.sqx.modules.app.entity.UserMoneyDetails">
+        select * from user_money_details
+        where user_id=#{userId}
+          and (classify!=3 or classify is null)
+        order by create_time desc
+    </select>
+
+    <select id="selectInviteMoneyDetailsUserId" resultType="com.sqx.modules.app.entity.UserMoneyDetails">
+        select * from user_money_details
+        where user_id=#{userId}
+          and classify in (3,6)
+        order by create_time desc
+    </select>
+
+    <select id="selectRefundMoney" resultType="java.math.BigDecimal">
+        select ifnull(sum(money),0.00) from user_money_details
+        where content='账户余额退款'
+        <if test="flag!=null and flag==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+    </select>
+
+    <select id="selectFenXiaoMoney" resultType="java.math.BigDecimal">
+        select ifnull(sum(money),0.00) from user_money_details
+        where user_id=#{userId} and classify=6
+    </select>
+
+    <select id="selectOrdersMoney" resultType="java.math.BigDecimal">
+        select ifnull(sum(money),0.00) from user_money_details
+        where classify=7 and type=2
+    </select>
+
+    <select id="selectSumRefund" resultType="java.math.BigDecimal">
+        select ifnull(sum(money), 0) from user_money_details where artificer_id = #{userId}
+        <if test="startTime!=null and startTime!=''">
+            and date_format(create_time,'%Y-%m-%d') >= date_format(#{startTime},'%Y-%m-%d')
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and date_format(create_time,'%Y-%m-%d') &lt;= date_format(#{endTime},'%Y-%m-%d')
+        </if>
+    </select>
+
+    <select id="selectSumMoneyByClassify" resultType="java.math.BigDecimal">
+        select ifnull(sum(money),0.00) from user_money_details
+        where classify=#{classify}
+        <if test="flag!=null and flag==1">
+            and date_format(create_time,'%Y-%m-%d')=date_format(#{time},'%Y-%m-%d')
+        </if>
+        <if test="flag!=null and flag==2">
+            and date_format(create_time,'%Y-%m')=date_format(#{time},'%Y-%m')
+        </if>
+        <if test="flag!=null and flag==3">
+            and date_format(create_time,'%Y')=date_format(#{time},'%Y')
+        </if>
+    </select>
+
+</mapper>

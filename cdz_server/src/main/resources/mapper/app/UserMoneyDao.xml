@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sqx.modules.app.dao.UserMoneyDao">
+
+    <update id="updateMayMoney">
+        update user_money  set
+        <if test="type==1">
+            money=money+#{money}
+        </if>
+        <if test="type==2">
+            money=money-#{money}
+        </if>
+        where user_id=#{userId}
+    </update>
+
+    <update id="updateInviteMoney">
+        update user_money  set
+        <if test="type==1">
+            invite_money=invite_money+#{money}
+        </if>
+        <if test="type==2">
+            invite_money=invite_money-#{money}
+        </if>
+        where user_id=#{userId}
+    </update>
+
+
+
+    <update id="updateShopMoney">
+        update user_money  set
+        <if test="type==1">
+            shop_money=shop_money+#{money}
+        </if>
+        <if test="type==2">
+            shop_money=shop_money-#{money}
+        </if>
+        where user_id=#{userId}
+    </update>
+
+    <update id="updateSumShopMoney">
+        update user_money  set
+        <if test="type==1">
+            sum_shop_money=sum_shop_money+#{money}
+        </if>
+        <if test="type==2">
+            sum_shop_money=sum_shop_money-#{money}
+        </if>
+        where user_id=#{userId}
+    </update>
+
+    <select id="selectSumMoney" resultType="Double">
+        select ifnull(sum(m.money),0)
+        from user_money m
+        left join tb_user u on u.user_id=m.user_id
+        where u.user_id is not null
+    </select>
+
+    <update id="updateCashDeposit">
+        update user_money  set
+        <if test="type==1">
+            cash_deposit=cash_deposit+#{cashDeposit}
+        </if>
+        <if test="type==2">
+            cash_deposit=cash_deposit-#{cashDeposit}
+        </if>
+        where user_id=#{userId}
+    </update>
+
+</mapper>

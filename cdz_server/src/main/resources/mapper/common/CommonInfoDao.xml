@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sqx.modules.common.dao.CommonInfoDao">
+
+
+    <select id="findByCondition" resultType="com.sqx.modules.common.entity.CommonInfo">
+        select * from common_info where condition_from=#{condition}
+    </select>
+
+    <select id="findOne" resultType="com.sqx.modules.common.entity.CommonInfo">
+        select * from common_info where `type`=#{type}
+    </select>
+
+    <select id="selectTalkPage" resultType="java.util.LinkedHashMap">
+        select
+        t.talk_id as talkId,
+        t.status,
+        u.user_name as nickName,
+        u.avatar as imageUrl,
+        t.is_delete as isDelete,
+        t.audit_content
+        as auditContent,
+        t.create_time as createTime,
+        t.content,
+        t.img,
+        t.share_num as shareNum,
+        t.user_id as userId,
+        t.video_url as videoUrl,
+        t.activity_id as activityId,
+        u.sex,
+        u.consortia_id as consortiaId,
+        t.address,
+        t.longitude,
+        t.latitude,
+        u.age,
+        t.city,
+        t.province,
+        t.district,
+        t.good_num as goodNum,
+        t.is_recommend as isRecommend,
+        t.popular_value as popularValue,
+        t.group_plan_id as groupPlanId,
+        (select count(*) from talk_comment c where c.talk_id=t.talk_id and c.is_delete is null) as commentCount,
+        t.admin_browse_count as totalBrowseCount,
+        t.virtual_view_count as virtualViewCount,
+        v.vip_icon as vipIcon,
+        (ifnull(t.admin_browse_count,0) + ifnull(t.virtual_view_count,0)) as adminBrowseCount,
+        (ifnull(t.admin_browse_count,0) + ifnull(t.virtual_view_count,0)) as browseCount,
+        (select count(*) from talk_comment c where c.talk_id=t.talk_id and c.user_id=#{byUserId} and c.is_delete is null) as commentByUserCount,
+        (select count(*) from good_talk c where c.talk_id=t.talk_id and c.user_id=#{byUserId}) as goodTalkByUserCount,
+        (select count(*) from talk_reward c where c.talk_id=t.talk_id and c.user_id=#{byUserId}) as rewardByUserCount,
+        (select count(*) from talk_reward c where c.talk_id=t.talk_id) as rewardCount,
+        (select count(*) from user_follow c where c.follow_user_id=t.user_id and c.user_id=#{byUserId}) as followCount,
+        (select count(*)+ifnull(t.good_num,0) from good_talk c where c.talk_id=t.talk_id) as goodTalkCount,
+        (select count(*) from good_talk c where c.talk_id=t.talk_id) as goodCount,
+        (ifnull((select count(*) from good_talk c where c.talk_id=t.talk_id),0) + ifnull(t.good_num,0)) as totalGoodCount,
+        (6371000 * acos( cos(radians(latitude)) * cos(radians(#{latitude})) * cos(radians(#{longitude}) - radians(longitude)) + sin(radians(latitude)) * sin(radians(#{latitude})) )) AS distance
+        from talk t
+        left join tb_user u on u.user_id=t.user_id
+        left join vip v on v.vip_index=u.vip_index
+        where u.user_id is not null and t.is_delete is null
+        <if test="status!=null and status!=0">
+            and t.status=#{status}
+        </if>
+        <if test="status==null">
+            and t.status=2
+        </if>
+        <if test="followUserId!=null and followUserId!=0">
+            and u.user_id in (select follow_user_id from user_follow where user_id=#{followUserId})
+        </if>
+        <if test="userId!=null and userId!=0">
+            and t.user_id=#{userId}
+        </if>
+        <if test="byUserId!=null and byUserId!=0">
+            and t.user_id not in (select by_user_id from blacklist where user_id=#{byUserId}) and t.user_id not in (select user_id from blacklist where by_user_id=#{byUserId})
+        </if>
+        <if test="isDelete==null">
+            and t.is_delete is null
+        </if>
+        <if test="city!=null and city!=''">
+            and t.city like concat('%',#{city},'%')
+        </if>
+        <if test="address!=null and address!=''">
+            and t.address like concat('%',#{address},'%')
+        </if>
+
+        <if test="goodUserId!=null">
+            and t.talk_id in (select talk_id from good_talk where user_id=#{goodUserId})
+        </if>
+        <if test="userName != null and userName != ''">
+            and u.user_name like concat('%',#{userName},'%')
+        </if>
+        <if test="content != null and content != ''">
+            and t.content like concat('%',#{content},'%')
+        </if>
+
+        <if test="circleId!=null">
+            and t.group_plan_id =#{circleId}
+        </if>
+        <if test="sort==null or sort==1">
+            order by t.create_time desc
+        </if>
+        <if test="sort!=null and sort==2">
+            order by distance asc,t.create_time desc
+        </if>
+        <if test="sort!=null and sort==3">
+            order by t.popular_value desc
+        </if>
+        <if test="sort!=null and sort==4">
+            order by goodCount desc
+        </if>
+        <if test="sort!=null and sort==5">
+            order by commentCount desc
+        </if>
+        <if test="sort!=null and sort==6">
+            order by t.admin_browse_count desc
+        </if>
+    </select>
+
+    <select id="selectCommentPage" resultType="Map">
+        select c.content,ifnull(u.user_name,'神秘用户') as nickName,u.avatar as imageUrl,c.create_time as createTime,c.comment_id as commentId,
+        u.phone,ifnull(u2.user_name,'神秘用户') as byNickName,u2.avatar as byImageUrl,u.user_id as userId,c.good_num as goodNum,u.province,is_recommend as isRecommend,
+        (select count(*) from good_comment cc where cc.comment_id=c.comment_id) as goodCount,c.content_img as contentImg,c.user_id_str as userIdStr,
+        (select count(*) from talk_comment cc where cc.parent_id=c.comment_id) as counts,c.is_delete as isDelete
+        from talk_comment c
+        left join tb_user u on u.user_id=c.user_id
+        left join tb_user u2 on u2.user_id=c.by_user_id
+        where u.user_id is not null
+        <if test="parentId!=null">
+            and c.parent_id=#{parentId}
+        </if>
+        <if test="userId!=null and userId!=0">
+            and c.user_id=#{userId}
+        </if>
+        <if test="talkId!=null and talkId!=0">
+            and c.talk_id=#{talkId}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and u.user_name like concat('%',#{userName},'%')
+        </if>
+        <if test="phone!=null and phone!=''">
+            and u.phone like concat('%',#{phone},'%')
+        </if>
+        <if test="content!=null and content!=''">
+            and c.content like concat('%',#{content},'%')
+        </if>
+        order by c.create_time desc
+    </select>
+
+
+
+    <select id="searchTalk" resultType="java.util.LinkedHashMap">
+        SELECT
+        t.talk_id as talkId,
+        t.status,
+        u.user_name as nickName,
+        u.avatar as imageUrl,
+        t.is_delete as isDelete,
+        t.audit_content
+        as auditContent,
+        t.create_time as createTime,
+        t.content,
+        t.img,
+        t.share_num as shareNum,
+        t.user_id as userId,
+        t.video_url as videoUrl,
+        t.activity_id as activityId,
+        u.sex,
+        u.consortia_id as consortiaId,
+        t.address,
+        t.longitude,
+        t.latitude,
+        u.age,
+        t.city,
+        t.province,
+        t.district,
+        t.good_num as goodNum,
+        t.is_recommend as isRecommend,
+        t.popular_value as popularValue,
+        t.group_plan_id as groupPlanId,
+        (select count(*) from talk_comment c where c.talk_id=t.talk_id and c.is_delete is null) as commentCount,t.admin_browse_count as adminBrowseCount,
+        (select count(*) from talk_reward c where c.talk_id=t.talk_id) as rewardCount,
+        (select ifnull(sum(content),0) from message_info c where c.platform_id=t.talk_id and c.state=120)+ifnull(admin_browse_count,0) as browseCount,
+        (select count(*)+ifnull(t.good_num,0) from good_talk c where c.talk_id=t.talk_id) as goodTalkCount,
+        (select count(*) from good_talk c where c.talk_id=t.talk_id) as goodCount,
+        (select count(*) from talk_comment c where c.talk_id=t.talk_id and c.user_id=#{byUserId} and c.is_delete is null) as commentByUserCount,
+        (select count(*) from good_talk c where c.talk_id=t.talk_id and c.user_id=#{byUserId}) as goodTalkByUserCount,
+        (select count(*) from talk_reward c where c.talk_id=t.talk_id and c.user_id=#{byUserId}) as rewardByUserCount,
+        (select count(*) from user_follow c where c.follow_user_id=t.user_id and c.user_id=#{byUserId}) as followCount
+        FROM
+        talk t
+        left join tb_user u on t.user_id=u.user_id
+        where u.user_id is not null
+        and t.is_delete is null
+        <if test="content != null and content != ''">
+            and t.content LIKE concat ('%',#{content},'%')
+        </if>
+        and t.status = '2'
+        order by t.popular_value DESC
+    </select>
+
+
+</mapper>
